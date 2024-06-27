@@ -36,6 +36,15 @@ public class Track implements ConsoleScanable {
         this.year = 1900;
     }
 
+    // new constructor to match the one in the addTrack method in main
+    public Track(String title, int duration, String writerName, String performerName, int year) {
+        this.title = title;
+        this.duration = duration;
+        this.writer = new Artist(writerName);
+        this.performer = new Artist(performerName);
+        this.year = year;
+    }
+
     public int getYear() {
         return year;
     }

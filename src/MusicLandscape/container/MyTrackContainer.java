@@ -21,41 +21,43 @@ public class MyTrackContainer extends Object{
     }
 
     public MyTrackContainer(Track[] t) {
-        this(Arrays.asList(t));
+        this();
+        addAll(t);
+        reset();
     }
 
+    //sort the selection of tracks
     public void sort(Comparator<Track> theComp, boolean asc) {
-        if (asc) {
-            Collections.sort(selection, theComp);
-        } else {
-            Collections.sort(selection, Collections.reverseOrder(theComp));
+        Collections.sort(selection, theComp);
+        if (!asc) {
+            Collections.reverse(selection);
         }
     }
 
+    //filter the selection based on a matcher
     public int filter(MyMatcher<Track> matcher) {
-        Iterator<Track> iterator = selection.iterator();
-        int removed = 0;
-        while (iterator.hasNext()) {
-            Track track = iterator.next();
+        int initialSize = selection.size();
+        Iterator<Track> it = selection.iterator();
+        while (it.hasNext()) {
+            Track track = it.next();
             if (!matcher.matches(track)) {
-                iterator.remove();
-                removed++;
+                it.remove();
             }
         }
-        return removed;
+        return initialSize - selection.size();
     }
 
     //add a single track, if not added already and if != null
     public boolean add(Track t) {
-        if(tracks.contains(t) || t == null ){
-            return false;
+        if (t != null && tracks.add(t)) {
+            return true;
         }
-        tracks.add(t);
-        return true;
+        return false;
     }
 
-    //return the number of track currently held by this container
-    public int size(){
+
+    // Get the size of the container
+    public int size() {
         return tracks.size();
     }
 
@@ -66,29 +68,56 @@ public class MyTrackContainer extends Object{
     }
 
     //bulk operation to add tracks
-    public int addAll(Track[] t){
-        int cnt = 0;
-        for(Track track : t){
-            if(add(track)){
-                cnt++;
+    public int addAll(Track[] t) {
+        int count = 0;
+        for (Track track : t) {
+            if (add(track)) {
+                count++;
             }
         }
-        return cnt;
+        return count;
     }
+
 
     //all selected tracks are removed
-    public int remove(){
-        int removed = selection.size();;
-        tracks.removeAll(selection);
+    public int remove() {
+        int removedCount = 0;
+        for (Track track : selection) {
+            if (tracks.remove(track)) {
+                removedCount++;
+            }
+        }
         reset();
-        return removed;
+        return removedCount;
     }
 
 
+    //Get a track by index
+    public Track get(int index) {
+        if (index >= 0 && index < selection.size()) {
+            return selection.get(index);
+        }
+        return null;
+    }
 
     //method to reset the selection
     public void reset(){
         selection.clear();
         selection.addAll(tracks);
+    }
+
+    // Check if the container is empty
+    public boolean isEmpty() {
+        return tracks.isEmpty();
+    }
+
+    public void resetSelection() {
+        selection.clear();
+        selection.addAll(tracks);
+    }
+
+    public void removeSelection() {
+        tracks.removeAll(selection);
+        selection.clear();
     }
 }

@@ -1,5 +1,6 @@
-package MusicLandscape.util;
+package MusicLandscape.util.formatters;
 import MusicLandscape.entities.Track;
+import MusicLandscape.util.MyFormatter;
 
 public class ShortTrackFormatter extends Object implements MyFormatter<Track> {
 
