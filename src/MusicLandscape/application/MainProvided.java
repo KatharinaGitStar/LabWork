@@ -1,5 +1,5 @@
 // **************************************************
-//		
+//
 //       git.rev = ${gitrev}
 //  git.revision = ${gitrevision}
 //         stage = ${stage}
@@ -7,15 +7,14 @@
 // ***************************************************
 package MusicLandscape.application;
 
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 import java.io.PrintWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 
 import MusicLandscape.container.MyTrackContainer;
 import MusicLandscape.entities.Track;
@@ -37,7 +36,7 @@ import MusicLandscape.util.io.MyTrackCSVReader;
 import MusicLandscape.util.formatters.ShortTrackFormatter;
 
 /**
- * 
+ *
  * @author TeM
  * @version ${gitrev}
  * @Stage ${stage}
@@ -95,7 +94,7 @@ public class MainProvided {
 		private MenuItem[] menu = {
 				new MenuItem("show menu") {
 					void execute() {
-						display();
+						display_menu();
 					}
 				},
 				new MenuItem("display selection") {
@@ -154,6 +153,11 @@ public class MainProvided {
 						selectFormatting();
 					}
 				},
+				new MenuItem("export to xml"){
+					void execute() {
+						export_to_xml();
+					}
+				},
 				new MenuItem("exit") {
 					void execute() {
 						System.out.println(GOOD_BYE_TEXT);
@@ -162,10 +166,25 @@ public class MainProvided {
 				}
 		};
 
-		void display() {
-			for (MenuItem m : menu) {
-				System.out.println(m);
+		public void display(MyTrackContainer db) {
+			if(db.size() == 0){
+				System.out.print("no records stored.\n");
+				return;
 			}
+			if(db.selection().length == 0){
+				System.out.print("selection empty.\n");
+				return;
+			}
+
+			System.out.println('\n' + theFormat.header());
+			System.out.println(theFormat.topSeparator());
+			for (Track tt : db.selection()) {
+				System.out.println(theFormat.format(tt));
+			}
+			System.out.println();
+
+			System.out.printf("%d out of %d records selected\n", db.selection().length, db.size());
+			//display_menu();
 		}
 
 		public boolean execute(int input) {
@@ -179,22 +198,44 @@ public class MainProvided {
 		}
 	}
 
+	void display_menu() {
+		for (MenuItem m : menu.menu) {
+			System.out.println(m);
+		}
+	}
+
 	public void go() {
 		System.out.println(WELCOME_TEXT);
-		Scanner sc = new Scanner(System.in);
-		menu.execute(0);
-		while (true) {
-			System.out.print(": ");
-			int input = Integer.parseInt(sc.nextLine());
-			if (menu.execute(input))
-				continue;
-
-			System.out.print("exit? (1=yes)");
-			if (Integer.parseInt(sc.nextLine()) == 1)
-				break;
+		try (Scanner sc = new Scanner(System.in)) {
+			menu.execute(0);
+			while (true) {
+				System.out.print(": ");
+				if (sc.hasNextLine()) {
+					String inputLine = sc.nextLine();
+					try {
+						int input = Integer.parseInt(inputLine);
+						if (menu.execute(input)) {
+							continue;
+						}
+						System.out.print("exit? (1=yes)");
+						if (sc.hasNextLine()) {
+							String exitLine = sc.nextLine();
+							if (Integer.parseInt(exitLine) == 1) {
+								break;
+							}
+						}
+					} catch (NumberFormatException e) {
+						System.out.println("Invalid input. Please enter a number.");
+					}
+				} else {
+					System.out.println("No input detected. Exiting program.");
+					break;
+				}
+			}
+		} catch (Exception e) {
+			System.out.println("An error occurred: " + e.getMessage());
+			e.printStackTrace();
 		}
-		System.out.println(GOOD_BYE_TEXT);
-		sc.close();
 	}
 
 	public static void main(String[] args) {
@@ -356,22 +397,37 @@ public class MainProvided {
 
 	private void loadTracks() {
 		Scanner scanner = new Scanner(System.in);
-		System.out.print("Enter the file name: ");
+		System.out.print("Enter the file name including full path: ");
 		String fileName = scanner.nextLine();
 
 		// Assuming loading from CSV format directly here
 		try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
 			String line;
+			boolean isFirstLine = true;
 			while ((line = reader.readLine()) != null) {
+				if (isFirstLine) {
+					// Skip the header line
+					isFirstLine = false;
+					continue;
+				}
 				String[] parts = line.split(",");
 				if (parts.length == 5) {
-					String title = parts[0];
-					String writer = parts[1];
-					String performer = parts[2];
-					int duration = Integer.parseInt(parts[3]);
-					int year = Integer.parseInt(parts[4]);
-					Track track = new Track(title, duration, writer, performer, year);
-					db.add(track);
+					try {
+						String title = parts[0];
+						String writer = parts[1];
+						String performer = parts[2];
+						int duration = Integer.parseInt(parts[3]);
+						int year = Integer.parseInt(parts[4]);
+						Track track = new Track(title, duration, writer, performer, year);
+						db.add(track);
+						System.out.println("Added track: " + track);
+					} catch (NumberFormatException e) {
+						System.out.println("Error parsing line: " + line);
+						System.out.println("Skipping invalid entry.");
+					}
+				} else {
+					System.out.println("Invalid line format: " + line);
+					System.out.println("Skipping invalid entry.");
 				}
 			}
 			System.out.println("Tracks loaded from " + fileName);
@@ -379,6 +435,8 @@ public class MainProvided {
 			System.out.println("Error loading tracks: " + e.getMessage());
 		}
 	}
+
+
 
 	private void reverseSortingOrder() {
 		asc = !asc;
@@ -422,11 +480,59 @@ public class MainProvided {
 		System.out.println("Sorting applied.");
 	}
 
+	private void export_to_xml(){
+		if(db.size() == 0){
+			System.out.print("no records stored.\n");
+			return;
+		}
+		if(db.selection().length == 0){
+			System.out.print("selection empty.\n");
+			return;
+		}
+
+		Scanner scanner = new Scanner(System.in);
+		System.out.print("Enter the file path (without file name): ");
+		String directoryPath = scanner.nextLine();
+
+		System.out.print("Enter the name of the file (without extension): ");
+		String fileName = scanner.nextLine();
+
+		String filePath = directoryPath + "/" + fileName + ".xml";
+
+		// Generate XML content from database
+		StringBuilder xmlContent = new StringBuilder();
+		xmlContent.append("<tracks>\n");
+
+		List<Track> tracks = db.getAllTracks(); // Assume this method returns all tracks in the database
+		for (Track track : tracks) {
+			xmlContent.append("    <track>\n");
+			xmlContent.append("        <title>").append(track.getTitle()).append("</title>\n");
+			xmlContent.append("        <writer>").append(track.getWriter().getName()).append("</writer>\n");
+			xmlContent.append("        <performer>").append(track.getPerformer().getName()).append("</performer>\n");
+			xmlContent.append("        <duration>").append(formatDuration(track.getDuration())).append("</duration>\n");
+			xmlContent.append("        <year>").append(track.getYear()).append("</year>\n");
+			xmlContent.append("    </track>\n");
+		}
+
+		xmlContent.append("</tracks>");
+
+		// Write the XML content to the file
+		try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+			writer.write(xmlContent.toString());
+			System.out.println("XML content has been written to " + filePath);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		scanner.close();
+
+	}
+
 	private void selectFormatting() {
 		Scanner scanner = new Scanner(System.in);
 		System.out.println("Select formatting option:");
 		System.out.println("1: Long format [Title Writer (min:sec)]");
-		System.out.println("2: Short format [Title (min:sec)]");
+		System.out.println("2: Short format [Title      (min:sec)]");
 		System.out.println("3: CSV format [Title, Writer, Performer, duration, year]");
 
 		int formattingOption = Integer.parseInt(scanner.nextLine());
@@ -448,4 +554,12 @@ public class MainProvided {
 
 		System.out.println("Formatting applied.");
 	}
+
+	private String formatDuration(int duration) {
+		int minutes = duration / 60;
+		int seconds = duration % 60;
+		return String.format("%02d:%02d", minutes, seconds);
+	}
+
+
 }

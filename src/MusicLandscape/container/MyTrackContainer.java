@@ -49,10 +49,17 @@ public class MyTrackContainer extends Object{
 
     //add a single track, if not added already and if != null
     public boolean add(Track t) {
-        if (t != null && tracks.add(t)) {
+        if(t != null && !tracks.contains(t)) {
+            tracks.add(t);
+            selection.add(t);
             return true;
         }
         return false;
+    }
+
+    // Add this method to return all tracks
+    public List<Track> getAllTracks() {
+        return new ArrayList<>(tracks);
     }
 
 

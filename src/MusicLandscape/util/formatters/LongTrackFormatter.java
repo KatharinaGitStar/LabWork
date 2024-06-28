@@ -50,11 +50,25 @@ public class LongTrackFormatter implements MyFormatter<Track> {
             return "";
         }
         return String.format("%-20s %-20s %-20s %-10s %-4d",
-                t.getTitle(),
-                t.getWriter(),
-                t.getPerformer(),
+                edit_string(t.getTitle(), 20),
+                edit_string(t.getWriter().getName(), 20),
+                edit_string(t.getPerformer().getName(), 20),
                 formatDuration(t.getDuration()),
                 t.getYear());
+    }
+
+    private String edit_string(String str, int length) {
+        if(str == null){
+            str = "";
+        }
+        //trim leading spaces
+        str = str.replaceAll("\\s", "");
+        if(str.length() <= length){
+            return String.format("%-" + length + "s", str);
+        } else {
+            return str.substring(0, length);
+        }
+
     }
 
     /**

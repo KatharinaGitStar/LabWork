@@ -22,7 +22,6 @@ public class CSVTrackFormatter extends Object implements MyFormatter <Track> {
         if(t == null) {
             return "";
         }
-        //return String.format("%s, %s, %s, %d, %d;",t.getTitle(), t.getPerformer(), t.getWriter(),t.getYear(), t.getDuration());
         return String.format("%s, %s, %s, %d, %d",t.getTitle(), t.getWriter(), t.getPerformer(), t.getDuration(), t.getYear());
     }
 
