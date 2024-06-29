@@ -37,7 +37,15 @@ public class Artist extends Object implements Comparable<Artist>{
         }
     }
 
-    public int compareTo(Artist arg0) {
-        return this.name.compareTo(arg0.name);
+
+    @Override
+    public int compareTo(Artist other) {
+        if (other == null || other.getName() == null) {
+            return 1;
+        }
+        if (this.name == null) {
+            return -1;
+        }
+        return this.name.compareToIgnoreCase(other.getName());
     }
 }
