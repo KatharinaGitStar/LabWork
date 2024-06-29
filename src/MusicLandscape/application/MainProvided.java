@@ -375,7 +375,7 @@ public class MainProvided {
 
 	private void saveSelection() {
 		Scanner scanner = new Scanner(System.in);
-		System.out.print("Enter the target file name: ");
+		System.out.print("Enter the target file name (full path): ");
 		String fileName = scanner.nextLine();
 
 		// Assuming writing to CSV format directly here
@@ -397,7 +397,7 @@ public class MainProvided {
 
 	private void loadTracks() {
 		Scanner scanner = new Scanner(System.in);
-		System.out.print("Enter the file name including full path: ");
+		System.out.print("Enter the file name (full path): ");
 		String fileName = scanner.nextLine();
 
 		// Assuming loading from CSV format directly here
@@ -501,6 +501,7 @@ public class MainProvided {
 
 		// Generate XML content from database
 		StringBuilder xmlContent = new StringBuilder();
+		xmlContent.append("<?xml version=\"1.0\" ?>\n");
 		xmlContent.append("<tracks>\n");
 
 		List<Track> tracks = db.getAllTracks(); // Assume this method returns all tracks in the database
@@ -523,8 +524,6 @@ public class MainProvided {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
-		scanner.close();
 
 	}
 
