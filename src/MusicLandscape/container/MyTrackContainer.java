@@ -26,7 +26,7 @@ public class MyTrackContainer extends Object{
         reset();
     }
 
-    //sort the selection of tracks
+    //sort the selection of tracks (performer, writer, etc.)
     public void sort(Comparator<Track> theComp, boolean asc) {
         Collections.sort(selection, theComp);
         if (!asc) {
