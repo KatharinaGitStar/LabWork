@@ -13,7 +13,7 @@ public class TitleMatcher extends MyMatcher<Track>{
 
     @Override
     public boolean matches(Track t) {
-        return t.getTitle().toLowerCase().startsWith(pattern);
+        return t.getTitle().toLowerCase().startsWith(pattern.toLowerCase());
     }
 
     @Override
