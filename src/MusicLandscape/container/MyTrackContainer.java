@@ -34,27 +34,28 @@ public class MyTrackContainer extends Object{
         }
     }
 
-    //filter the selection based on a matcher
+    // Filter the selection based on a matcher
     public int filter(MyMatcher<Track> matcher) {
-        int initialSize = selection.size();
-        Iterator<Track> it = selection.iterator();
-        while (it.hasNext()) {
-            Track track = it.next();
-            if (!matcher.matches(track)) {
-                it.remove();
+        List<Track> newSelection = new ArrayList<>();
+        for (Track track : selection) {
+            if (matcher.matches(track)) {
+                newSelection.add(track);
             }
         }
-        return initialSize - selection.size();
+        int removedCount = selection.size() - newSelection.size();
+        selection = newSelection;
+        return removedCount;
     }
+
 
     //add a single track, if not added already and if != null
     public boolean add(Track t) {
-        if(t != null && !tracks.contains(t)) {
-            tracks.add(t);
-            selection.add(t);
-            return true;
+        if(t == null || tracks.contains(t)){
+            return false;
         }
-        return false;
+        boolean added = tracks.add(t);
+
+        return added;
     }
 
     // Add this method to return all tracks
@@ -65,6 +66,7 @@ public class MyTrackContainer extends Object{
 
     // Get the size of the container
     public int size() {
+        reset();
         return tracks.size();
     }
 
