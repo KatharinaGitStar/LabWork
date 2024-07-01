@@ -54,6 +54,7 @@ public class MyTrackContainer extends Object{
             return false;
         }
         boolean added = tracks.add(t);
+        selection.add(t);
 
         return added;
     }
@@ -66,7 +67,6 @@ public class MyTrackContainer extends Object{
 
     // Get the size of the container
     public int size() {
-        reset();
         return tracks.size();
     }
 
