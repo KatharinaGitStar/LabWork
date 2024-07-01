@@ -28,8 +28,7 @@ import MusicLandscape.util.comparators.WriterComparator;
 import MusicLandscape.util.comparators.YearComparator;
 import MusicLandscape.util.formatters.CSVTrackFormatter;
 import MusicLandscape.util.formatters.LongTrackFormatter;
-import MusicLandscape.util.matcher.DurationMatcher;
-import MusicLandscape.util.matcher.TitleMatcher;
+import MusicLandscape.util.matcher.*;
 import MusicLandscape.util.io.MyReader;
 import MusicLandscape.util.io.MyWriter;
 import MusicLandscape.util.io.MyTrackCSVReader;
@@ -332,39 +331,74 @@ public class MainProvided {
 		Scanner scanner = new Scanner(System.in);
 		System.out.println("Available filters:");
 		System.out.println("1: Title starts with");
-		System.out.println("2: Duration in range");
-
-		// TODO: Add more filter options as needed
+		System.out.println("2: Title contains");
+		System.out.println("3: Duration in range");
+		System.out.println("4: Year in range");
+		System.out.println("5: Writer starts with");
+		System.out.println("6: Writer contains");
+		System.out.println("7: Performer starts with");
+		System.out.println("8: Performer contains");
 
 		System.out.print("Select filter: ");
 		int filterOption = Integer.parseInt(scanner.nextLine());
 
+		MyMatcher<Track> matcher = null;
+
 		switch (filterOption) {
 			case 1:
-				System.out.print("Enter title pattern: ");
-				String pattern = scanner.nextLine();
-				MyMatcher<Track> titleMatcher = new TitleMatcher(pattern);
-				db.filter(titleMatcher);
+				System.out.print("Enter title start pattern: ");
+				String title = scanner.nextLine();
+				matcher = new TitleMatcher(title);
 				break;
 			case 2:
+				System.out.print("Enter title pattern: ");
+				String pattern = scanner.nextLine();
+                matcher = new TitlePattern(pattern);
+				break;
+			case 3:
 				System.out.print("Enter minimum duration: ");
 				int minDuration = Integer.parseInt(scanner.nextLine());
 				System.out.print("Enter maximum duration: ");
 				int maxDuration = Integer.parseInt(scanner.nextLine());
-				MyMatcher<Track> durationMatcher = new DurationMatcher(minDuration + " " + maxDuration);
-				db.filter(durationMatcher);
+				matcher = new DurationMatcher(minDuration + " " + maxDuration);
 				break;
-			// TODO: Add more cases for additional filters
+			case 4:
+				System.out.print("Enter minimum year: ");
+				int minYear = Integer.parseInt(scanner.nextLine());
+				System.out.print("Enter maximum year: ");
+				int maxYear = Integer.parseInt(scanner.nextLine());
+				matcher = new YearMatcher(minYear + " " + maxYear);
+				break;
+			case 5: // funktioniert nicht
+				System.out.print("Enter writer start pattern: ");
+				String writer = scanner.nextLine();
+				matcher = new WriterMatcher(writer);
+				break;
+			case 6:
+				System.out.print("Enter writer pattern: ");
+				String writer_pattern = scanner.nextLine();
+				matcher = new WriterPattern(writer_pattern);
+				break;
+			case 7:
+				System.out.print("Enter performer start pattern: ");
+				String performer = scanner.nextLine();
+				matcher = new PerformerMatcher(performer);
+				break;
+			case 8:
+				System.out.print("Enter performer pattern: ");
+				String performer_pattern = scanner.nextLine();
+				matcher = new PerformerPattern(performer_pattern);
+				break;
 			default:
 				System.out.println("Invalid filter option.");
 				return;
 		}
-
+		db.filter(matcher);
 		System.out.println("Filter applied.");
 	}
 
 	private void resetSelection() {
-		db.resetSelection();
+		db.resetSelection(); //funktioniert nicht
 		System.out.println("Selection reset.");
 	}
 
