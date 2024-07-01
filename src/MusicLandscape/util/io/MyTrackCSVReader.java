@@ -3,7 +3,9 @@ import MusicLandscape.entities.Artist;
 import MusicLandscape.entities.Track;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+
 
 public class MyTrackCSVReader extends MyReader<Track>{
 
@@ -18,7 +20,7 @@ public class MyTrackCSVReader extends MyReader<Track>{
     }
 
     @Override
-    public Track get(){
+    public Track get() {
         try{
             String line = in.readLine();
             if(line != null) {
@@ -26,7 +28,7 @@ public class MyTrackCSVReader extends MyReader<Track>{
                 String[] tokens = line.split(",");
 
                 if (tokens.length < 5) {
-                    System.out.println("Error parsing.");
+                    System.out.println("Skipping invalid entry: " + line);
                     return null;
                 }
 
@@ -40,19 +42,22 @@ public class MyTrackCSVReader extends MyReader<Track>{
 
                 track.setTitle(title);
                 track.setWriter(new Artist(writer));
+                track.setPerformer(new Artist(performer));
                 track.setDuration(duration);
                 track.setYear(year);
-                track.setPerformer(new Artist(performer));
+
+                System.out.println("Added track: " + track);
 
                 return track;
             }
-        }catch (IOException | NullPointerException e){
-            System.out.println("Error reading.");
-            return null;
-        }catch (NumberFormatException e){
-            System.out.println("Error parsing.");
-            return null;
-        }
+    }catch (IOException | NullPointerException e){
+        System.out.println("Error reading.");
         return null;
+    }catch (NumberFormatException e){
+        System.out.println("Error parsing.");
+        return null;
+    }
+
+    return null;
     }
 }
